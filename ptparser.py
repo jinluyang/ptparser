@@ -20,17 +20,22 @@ class Result:
 				or 'MAX' in layerlines[i]:
 				continue
 
+			layerlines[i] = layerlines[i].strip()
 			squeeze = ''.join(layerlines[i].split(' '))
-			if squeeze == '}' or squeeze == '':
+			if squeeze == '}' or squeeze == '' or layerlines[i] == None:
 				continue
 
 			jstr = '{' + '"' + '":'.join(''.join((layerlines[i].strip()).split(' ')).split(':'))+'}'
 			if debug:
+				print layerlines[i]
 				print jstr
 
 			if layerlines[i].strip() == '':
 				continue
 				
+			if 'AVE' in jstr:
+				layerdict['pool'] = 'AVE'
+				continue
 			linedict = json.loads(jstr)
 
 			if 'name' in layerlines[i]:
