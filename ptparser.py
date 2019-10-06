@@ -3,10 +3,10 @@ import argparse
 import json
 from termcolor import colored
 
-debug = True #False
+debug = False
 
 class Result:
-	def Result(self):
+	def __init__(self):
 		self.layers = []
 		
 	def parse_layer(self, layer):
@@ -16,8 +16,7 @@ class Result:
 			if 'layer' in layerlines[i] or 'include' in layerlines[i] \
 				or 'param' in layerlines[i] or 'phase' in layerlines[i] \
 				or 'backend' in layerlines[i] \
-				or 'filler' in layerlines[i] \
-				or 'MAX' in layerlines[i]:
+				or 'filler' in layerlines[i]:
 				continue
 
 			layerlines[i] = layerlines[i].strip()
@@ -36,6 +35,11 @@ class Result:
 			if 'AVE' in jstr:
 				layerdict['pool'] = 'AVE'
 				continue
+				
+			if 'MAX' in jstr:
+				layerdict['pool'] = 'MAX'
+				continue
+				
 			linedict = json.loads(jstr)
 
 			if 'name' in layerlines[i]:
@@ -164,6 +168,13 @@ class Result:
 				print colored('params: {}x{} = {}'.format(input_feat_dim, output_feat_dim, params_fc), 'blue')
 
 		print colored('TOTAL params: %.1f MB parameters'% (params_total*4.0/1024/1024), 'blue')
+		
+	def printNet(self):
+		for layerdict in self.layers:
+			print '======================================'
+			for key in layerdict:
+				print key, layerdict[key]
+				
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -177,7 +188,6 @@ def main():
 	f.close()
 
 	res = Result()
-	res.layers=[]
 	
 	if "layers" not in prototxt:
 		layerstrs = prototxt.split('layer {')
@@ -189,6 +199,7 @@ def main():
 			layerstrs[i] = 'layers {'+layerstrs[i]
 
 	res.count_layer_info(layerstrs, args)
+	res.printNet()
 	print "length of net:"
 	print len(res.layers)
 
